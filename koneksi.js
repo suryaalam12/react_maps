@@ -23,13 +23,17 @@ export async function insertRecord(petugas, coordinates) {
     const { data, error } = await supabase
       .from("data_titik")
       .insert([{ nama: petugas, geom: geom }]);
-    alert("Sukses");
+
     if (error) {
       console.error("Error inserting record:", error);
+      return { error }; // Return the error
     } else {
       console.log("Record inserted successfully:", data);
+      alert("Sukses");
+      return { data }; // Return the inserted data
     }
   } catch (error) {
     console.error("Unexpected error:", error);
+    return { error }; // Return the caught error
   }
 }

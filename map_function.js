@@ -13,6 +13,9 @@ export default function MyMap() {
   const [coordinates, setCoordinates] = useState("");
   const mapRef = useRef(null);
   const { markers, fetchMarkers } = useFetchMarkers();
+  useEffect(() => {
+    fetchMarkers(); // Fetch markers on component mount
+  }, []);
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -67,7 +70,7 @@ export default function MyMap() {
         ref={mapRef}
         style={styles.map}
         initialRegion={{
-          latitude: -6.2,
+          latitude: -6.1,
           longitude: 106.816666,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,

@@ -7,8 +7,8 @@ import {
   StyleSheet,
   TextInput,
 } from "react-native";
-import { insertRecord } from "./koneksi";
 import { useFetchMarkers } from "./refreshLayer";
+import { useHandlePress } from "./refreshLayer";
 
 const Sidebar = ({ coordinates }) => {
   const [petugas, setPetugas] = useState("");
@@ -16,16 +16,8 @@ const Sidebar = ({ coordinates }) => {
   const [tipeIklan, setTipeIklan] = useState("");
   const [ukuran, setUkuran] = useState("");
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const { handlePress } = useHandlePress();
   const { fetchMarkers } = useFetchMarkers();
-
-  const handlePress = async () => {
-    await insertRecord(petugas, titikLokasi);
-    setTitikLokasi("");
-    setPetugas("");
-    setIsSidebarVisible(false);
-
-    fetchMarkers();
-  };
 
   if (!isSidebarVisible) {
     return null;
@@ -71,7 +63,19 @@ const Sidebar = ({ coordinates }) => {
           onChangeText={setUkuran}
         />
       </View>
-      <TouchableOpacity style={styles.sidebarButton} onPress={handlePress}>
+      <TouchableOpacity
+        style={styles.sidebarButton}
+        onPress={() =>
+          handlePress(
+            petugas,
+            titikLokasi,
+            setPetugas,
+            setTitikLokasi,
+            setIsSidebarVisible,
+            fetchMarkers
+          )
+        }
+      >
         <Text style={styles.sidebarButtonText}>Unggah Data</Text>
       </TouchableOpacity>
     </View>
