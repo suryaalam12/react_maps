@@ -13,10 +13,9 @@ export const useFetchMarkers = () => {
 
       if (error) {
         console.error("Error fetching data:", error);
-        return; // Exit early if there was an error
+        return;
       }
 
-      console.log("Fetched data:", data); // Log fetched data for debugging
       const parsedMarkers = data
         .map((item) => {
           if (item.geom && item.geom.coordinates) {
@@ -46,7 +45,6 @@ export const useFetchMarkers = () => {
 
 export const useHandlePress = () => {
   const { fetchMarkers } = useFetchMarkers();
-
   const handlePress = async (
     petugas,
     titikLokasi,

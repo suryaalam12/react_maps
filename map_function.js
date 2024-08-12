@@ -12,10 +12,17 @@ export default function MyMap() {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [coordinates, setCoordinates] = useState("");
   const mapRef = useRef(null);
-  const { markers, fetchMarkers } = useFetchMarkers();
+  const { fetchMarkers, markers } = useFetchMarkers();
+
   useEffect(() => {
-    fetchMarkers(); // Fetch markers on component mount
-  }, []);
+    fetchMarkers(); // Fetch initially when the component mounts
+  }, [fetchMarkers]);
+
+  // Log markers only when they change and only after the initial fetch
+  useEffect(() => {
+    if (markers.length > 0) {
+    }
+  }, [markers]); // Add fetchMarkers and markers as dependencies
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -55,7 +62,7 @@ export default function MyMap() {
     if (location) {
       const lat = formatCoordinate(location.latitude);
       const lng = formatCoordinate(location.longitude);
-      setCoordinates(`${lat}, ${lng}`);
+      setCoordinates(`${lat} ${lng}`);
     }
     setSidebarVisible(!sidebarVisible);
   };
@@ -87,6 +94,7 @@ export default function MyMap() {
               const { latitude, longitude } = e.nativeEvent.coordinate;
               setLocation({ latitude, longitude });
             }}
+            pinColor="blue" // Color for location marker
           >
             <Callout>
               <View style={styles.calloutContainer}>
@@ -100,16 +108,17 @@ export default function MyMap() {
             </Callout>
           </Marker>
         )}
-
-        {markers.map((marker) => (
-          <Marker key={marker.id} coordinate={marker.coordinates}>
-            <Callout>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{marker.name}</Text>
-              </View>
-            </Callout>
-          </Marker>
-        ))}
+        {markers.map((marker) => {
+          return (
+            <Marker key={marker.id} coordinate={marker.coordinates}>
+              <Callout>
+                <View style={styles.calloutContainer}>
+                  <Text style={styles.calloutTitle}>{marker.name}</Text>
+                </View>
+              </Callout>
+            </Marker>
+          );
+        })}
       </MapView>
 
       <TouchableOpacity style={styles.locateButton} onPress={handleLocatePress}>
@@ -122,7 +131,7 @@ export default function MyMap() {
         <Text style={styles.locateButtonText}>Street View</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.unggahButton} onPress={toggleSidebar}>
-        <Text style={styles.locateButtonText}>Unggah Data</Text>
+        <Text style={styles.locateButtonText}>Tambah Titik</Text>
       </TouchableOpacity>
       {sidebarVisible && <Sidebar coordinates={coordinates} />}
     </View>
