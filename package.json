@@ -13,11 +13,13 @@
     "@supabase/supabase-js": "^2.45.1",
     "@types/react": "~18.2.79",
     "expo": "~51.0.26",
+    "expo-camera": "~15.0.15",
     "expo-location": "~17.0.1",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
     "react-native": "0.74.5",
     "react-native-maps": "1.14.0",
+    "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "^15.5.0",
     "react-native-url-polyfill": "^2.0.0",
     "typescript": "~5.3.3"

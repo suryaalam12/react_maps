@@ -1,9 +1,11 @@
+// MyMap.js
 import React, { useState, useEffect, useRef } from "react";
 import { Text, TouchableOpacity, View, Alert, Linking } from "react-native";
 import MapView, { Marker, Callout } from "react-native-maps";
 import * as Location from "expo-location";
 import styles from "./header";
 import Sidebar from "./sidebar";
+import CameraComponent from "./camera";
 import { useFetchMarkers } from "./refreshLayer";
 
 export default function MyMap() {
@@ -11,18 +13,20 @@ export default function MyMap() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [coordinates, setCoordinates] = useState("");
+  const [isCameraVisible, setIsCameraVisible] = useState(false);
+  const [capturedImage, setCapturedImage] = useState(null);
   const mapRef = useRef(null);
   const { fetchMarkers, markers } = useFetchMarkers();
 
   useEffect(() => {
-    fetchMarkers(); // Fetch initially when the component mounts
+    fetchMarkers();
   }, [fetchMarkers]);
 
-  // Log markers only when they change and only after the initial fetch
   useEffect(() => {
     if (markers.length > 0) {
+      // Handle markers update if needed
     }
-  }, [markers]); // Add fetchMarkers and markers as dependencies
+  }, [markers]);
 
   const handleLocatePress = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -71,69 +75,99 @@ export default function MyMap() {
     return coordinate.toFixed(6);
   };
 
+  const openCamera = () => {
+    setIsCameraVisible(true);
+  };
+
+  const closeCamera = () => {
+    setIsCameraVisible(false); // This function closes the camera
+  };
+
+  const handleCapture = (image) => {
+    console.log("Captured image:", image);
+    setCapturedImage(image.uri); // Save the image URI to state
+    closeCamera();
+  };
+
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        initialRegion={{
-          latitude: -6.1,
-          longitude: 106.816666,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-      >
-        {location && (
-          <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+      {isCameraVisible ? (
+        <CameraComponent onCapture={handleCapture} onClose={closeCamera} /> // Pass the closeCamera function
+      ) : (
+        <>
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={{
+              latitude: -6.1,
+              longitude: 106.816666,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
             }}
-            draggable
-            onDragEnd={(e) => {
-              const { latitude, longitude } = e.nativeEvent.coordinate;
-              setLocation({ latitude, longitude });
-            }}
-            pinColor="blue" // Color for location marker
           >
-            <Callout>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>Lokasi Anda</Text>
-                <Text style={styles.calloutDescription}>
-                  {`${formatCoordinate(location.latitude)} ${formatCoordinate(
-                    location.longitude
-                  )}`}
-                </Text>
-              </View>
-            </Callout>
-          </Marker>
-        )}
-        {markers.map((marker) => {
-          return (
-            <Marker key={marker.id} coordinate={marker.coordinates}>
-              <Callout>
-                <View style={styles.calloutContainer}>
-                  <Text style={styles.calloutTitle}>{marker.name}</Text>
-                </View>
-              </Callout>
-            </Marker>
-          );
-        })}
-      </MapView>
+            {location && (
+              <Marker
+                coordinate={{
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                }}
+                draggable
+                onDragEnd={(e) => {
+                  const { latitude, longitude } = e.nativeEvent.coordinate;
+                  setLocation({ latitude, longitude });
+                }}
+                pinColor="blue" // Color for location marker
+              >
+                <Callout>
+                  <View style={styles.calloutContainer}>
+                    <Text style={styles.calloutTitle}>Lokasi Anda</Text>
+                    <Text style={styles.calloutDescription}>
+                      {`${formatCoordinate(
+                        location.latitude
+                      )} ${formatCoordinate(location.longitude)}`}
+                    </Text>
+                  </View>
+                </Callout>
+              </Marker>
+            )}
+            {markers.map((marker) => {
+              return (
+                <Marker key={marker.id} coordinate={marker.coordinates}>
+                  <Callout>
+                    <View style={styles.calloutContainer}>
+                      <Text style={styles.calloutTitle}>{marker.name}</Text>
+                    </View>
+                  </Callout>
+                </Marker>
+              );
+            })}
+          </MapView>
 
-      <TouchableOpacity style={styles.locateButton} onPress={handleLocatePress}>
-        <Text style={styles.locateButtonText}>Lokasi Anda</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.streetViewButton}
-        onPress={openStreetView}
-      >
-        <Text style={styles.locateButtonText}>Street View</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.unggahButton} onPress={toggleSidebar}>
-        <Text style={styles.locateButtonText}>Tambah Titik</Text>
-      </TouchableOpacity>
-      {sidebarVisible && <Sidebar coordinates={coordinates} />}
+          <TouchableOpacity
+            style={styles.locateButton}
+            onPress={handleLocatePress}
+          >
+            <Text style={styles.locateButtonText}>Lokasi Anda</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.streetViewButton}
+            onPress={openStreetView}
+          >
+            <Text style={styles.locateButtonText}>Street View</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.unggahButton} onPress={toggleSidebar}>
+            <Text style={styles.locateButtonText}>Tambah Titik</Text>
+          </TouchableOpacity>
+
+          {sidebarVisible && (
+            <Sidebar
+              coordinates={coordinates}
+              onOpenCamera={openCamera}
+              capturedImage={capturedImage} // Pass the captured image to Sidebar
+            />
+          )}
+        </>
+      )}
     </View>
   );
 }
